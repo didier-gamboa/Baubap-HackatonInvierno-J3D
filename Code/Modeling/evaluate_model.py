@@ -10,19 +10,18 @@ def evaluate_model(model_path, data_path, output_path):
     # Carga el conjunto de datos de evaluación
     eval_data = pd.read_csv(data_path)
     
-    # Separa la variable objetivo y las variables predictoras
-    X_eval = eval_data.drop("Target", axis=1)
-    y_eval = eval_data["Target"]
+    # Guarda las variables predictoras
+    X_eval = eval_data.copy()
+    if 'Target' in X_eval.columns:
+        X_eval = X_eval.drop('Target', axis=1)
     
     # Realiza predicciones en el conjunto de evaluación
     predictions_eval = model.predict_proba(X_eval)[:, 1]
+     
+    # Agrega las predicciones al conjunto de datos en la columna 'Target'
+    eval_data['Target'] = predictions_eval
     
-    # Calcula el Brier Score en el conjunto de evaluación
-    brier_score_eval = brier_score_loss(y_eval, predictions_eval)
-    print(f"Brier Score en conjunto de evaluación: {brier_score_eval}")
-    
-    # Guarda las probabilidades predichas en un archivo CSV
-    eval_data['Predicted_Probability'] = predictions_eval
+    # Guarda los datos con las predicciones en un archivo CSV
     eval_data.to_csv(output_path, index=False)
 
 def main():
